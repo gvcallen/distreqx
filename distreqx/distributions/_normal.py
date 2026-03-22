@@ -59,6 +59,10 @@ class Normal(AbstractProbDistribution, strict=True):
     def cdf(self, value: Array) -> Array:
         """See `Distribution.cdf`."""
         return jax.scipy.special.ndtr(self._standardize(value))
+    
+    def icdf(self, u: Array) -> Array:
+        """See `Distribution.icdf`."""
+        return self.loc + self.scale * jax.scipy.special.ndtri(u)
 
     def log_cdf(self, value: Array) -> Array:
         """See `Distribution.log_cdf`."""

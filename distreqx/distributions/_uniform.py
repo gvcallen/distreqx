@@ -66,6 +66,12 @@ class Uniform(
             value < self.low, zeros, (value - self.low) / self.range
         )
         return jnp.where(value > self.high, ones, result_if_not_big)
+    
+    def icdf(self, u: Array) -> Array:
+        """See `Distribution.icdf`."""
+        if not jnp.all((u >= 0) & (u <= 1)):
+            raise ValueError("icdf input must be in [0, 1]")
+        return self.low + u * self.range    
 
     def log_cdf(self, value: Array) -> Array:
         """See `Distribution.log_cdf`."""
