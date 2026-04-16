@@ -198,13 +198,56 @@ class Transformed(AbstractTransformed, AbstractSTDDistribution, strict=True):
             )
 
     def icdf(self, value: PyTree[Array]) -> PyTree[Array]:
-        raise NotImplementedError
+        """Calculates the inverse cumulative distribution function.
+
+        Takes a probability `p` (or PyTree of probabilities) and returns the
+        corresponding quantile in the transformed space.
+        """
+        # 1. Evaluate the base ICDF assuming an increasing transformation
+        x_inc = self.distribution.icdf(value)
+
+        # 2. Check the sign of the derivative at this base location
+        ones = jax.tree_util.tree_map(jnp.ones_like, x_inc)
+        _, jvp_val = jax.jvp(self.bijector.forward, (x_inc,), (ones,))
+        is_increasing = jax.tree_util.tree_map(lambda j: j > 0, jvp_val)
+
+        # 3. Evaluate the base ICDF assuming a decreasing transformation (using 1 - p)
+        # Note: If AbstractSurvivalDistribution exposes a `survival_icdf`, use that
+        # for better numerical stability near p=1. Otherwise, 1.0 - value is standard.
+        x_dec = self.distribution.icdf(jax.tree_util.tree_map(lambda v: 1.0 - v, value))
+
+        # 4. Route the correct base variables and push forward
+        x_correct = jax.tree_util.tree_map(
+            lambda inc, xi, xd: jnp.where(inc, xi, xd), is_increasing, x_inc, x_dec
+        )
+
+        return self.bijector.forward(x_correct)
 
     def log_cdf(self, value: PyTree[Array]) -> PyTree[Array]:
-        raise NotImplementedError
+        x = self.bijector.inverse(value)
+
+        ones = jax.tree_util.tree_map(jnp.ones_like, x)
+        _, jvp_val = jax.jvp(self.bijector.forward, (x,), (ones,))
+        is_increasing = jax.tree_util.tree_map(lambda j: j > 0, jvp_val)
+
+        base_log_cdf = self.distribution.log_cdf(x)
+        base_log_survival = self.distribution.log_survival_function(x)
+
+        return jax.tree_util.tree_map(
+            lambda inc, b_lcdf, b_lsurv: jnp.where(inc, b_lcdf, b_lsurv),
+            is_increasing,
+            base_log_cdf,
+            base_log_survival,
+        )
 
     def median(self) -> PyTree[Array]:
-        raise NotImplementedError
+        # The median is simply the ICDF evaluated at p = 0.5
+        # We construct a PyTree of 0.5s matching the event shape/dtype of the base dist
+        dummy_shape = self.distribution.event_shape
+        dummy_dtype = self.distribution.dtype
+
+        half_prob = jnp.full(dummy_shape, 0.5, dtype=dummy_dtype)
+        return self.icdf(half_prob)
 
     def variance(self) -> Array:
         """Calculates the variance."""
@@ -245,7 +288,24 @@ class Transformed(AbstractTransformed, AbstractSTDDistribution, strict=True):
             )
 
     def cdf(self, value: PyTree[Array]) -> PyTree[Array]:
-        raise NotImplementedError
+        x = self.bijector.inverse(value)
+
+        # 1. Use JVP to dynamically determine the local sign of the derivative
+        ones = jax.tree_util.tree_map(jnp.ones_like, x)
+        _, jvp_val = jax.jvp(self.bijector.forward, (x,), (ones,))
+        is_increasing = jax.tree_util.tree_map(lambda j: j > 0, jvp_val)
+
+        # 2. Evaluate both base probabilities
+        base_cdf = self.distribution.cdf(x)
+        base_survival = self.distribution.survival_function(x)
+
+        # 3. Route based on monotonicity
+        return jax.tree_util.tree_map(
+            lambda inc, b_cdf, b_surv: jnp.where(inc, b_cdf, b_surv),
+            is_increasing,
+            base_cdf,
+            base_survival,
+        )
 
     def kl_divergence(self, other_dist, **kwargs) -> Array:
         """Obtains the KL divergence between two Transformed distributions.
