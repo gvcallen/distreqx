@@ -198,115 +198,19 @@ class Transformed(AbstractTransformed, AbstractSTDDistribution, strict=True):
             )
 
     def icdf(self, value: PyTree[Array]) -> PyTree[Array]:
-        """Calculates the inverse cumulative distribution function.
-
-        Takes a probability `p` (or PyTree of probabilities) and returns the
-        corresponding quantile in the transformed space.
-        """
-        # 1. Evaluate the base ICDF assuming an increasing transformation
-        x_inc = self.distribution.icdf(value)
-
-        # 2. Check the sign of the derivative at this base location
-        ones = jax.tree_util.tree_map(jnp.ones_like, x_inc)
-        _, jvp_val = jax.jvp(self.bijector.forward, (x_inc,), (ones,))
-        is_increasing = jax.tree_util.tree_map(lambda j: j > 0, jvp_val)
-
-        # 3. Evaluate the base ICDF assuming a decreasing transformation (using 1 - p)
-        # Note: If AbstractSurvivalDistribution exposes a `survival_icdf`, use that
-        # for better numerical stability near p=1. Otherwise, 1.0 - value is standard.
-        x_dec = self.distribution.icdf(jax.tree_util.tree_map(lambda v: 1.0 - v, value))
-
-        # 4. Route the correct base variables and push forward
-        x_correct = jax.tree_util.tree_map(
-            lambda inc, xi, xd: jnp.where(inc, xi, xd), is_increasing, x_inc, x_dec
-        )
-
-        return self.bijector.forward(x_correct)
+        raise NotImplementedError
 
     def log_cdf(self, value: PyTree[Array]) -> PyTree[Array]:
-        x = self.bijector.inverse(value)
-
-        ones = jax.tree_util.tree_map(jnp.ones_like, x)
-        _, jvp_val = jax.jvp(self.bijector.forward, (x,), (ones,))
-        is_increasing = jax.tree_util.tree_map(lambda j: j > 0, jvp_val)
-
-        base_log_cdf = self.distribution.log_cdf(x)
-        base_log_survival = self.distribution.log_survival_function(x)
-
-        return jax.tree_util.tree_map(
-            lambda inc, b_lcdf, b_lsurv: jnp.where(inc, b_lcdf, b_lsurv),
-            is_increasing,
-            base_log_cdf,
-            base_log_survival,
-        )
+        raise NotImplementedError
 
     def median(self) -> PyTree[Array]:
-        # The median is simply the ICDF evaluated at p = 0.5
-        # We construct a PyTree of 0.5s matching the event shape/dtype of the base dist
-        dummy_shape = self.distribution.event_shape
-        dummy_dtype = self.distribution.dtype
-
-        half_prob = jnp.full(dummy_shape, 0.5, dtype=dummy_dtype)
-        return self.icdf(half_prob)
+        raise NotImplementedError
 
     def variance(self) -> PyTree[Array]:
         raise NotImplementedError
 
-    def covariance(self) -> Array:
-        """Calculates the covariance.
-
-        Only supported if the bijector has a constant Jacobian,
-        and the underlying distribution has a `covariance` method.
-        """
-        if self.bijector.is_constant_jacobian and hasattr(
-            self.distribution, "covariance"
-        ):
-            base_cov = self.distribution.covariance()  # pyright: ignore
-
-            # 1. Setup linearization point
-            dummy_x = jnp.zeros(
-                self.distribution.event_shape, dtype=self.distribution.dtype
-            )
-
-            # 2. Define the Jacobian-Vector Product (push-forward) function
-            # jax.jvp(f, (x,), (v,)) returns (f(x), Jv)
-            def push_fwd(v):
-                return jax.jvp(self.bijector.forward, (dummy_x,), (v,))[1]
-
-            # 3. Apply J to the columns of base_cov: M = J @ Cx
-            # We vmap over the last dimension of Cx
-            j_cx = jax.vmap(push_fwd, in_axes=-1, out_axes=-1)(base_cov)
-
-            # 4. Apply J to the rows of the result: M @ J.T = (J @ M.T).T
-            # Applying J to the rows of M is equivalent to M @ J.T
-            return jax.vmap(push_fwd, in_axes=0, out_axes=0)(j_cx)
-
-        else:
-            raise NotImplementedError(
-                "`covariance` is not implemented for this transformed distribution. "
-                "Ensure the bijector has a constant Jacobian and the base "
-                "distribution supports covariance."
-            )
-
     def cdf(self, value: PyTree[Array]) -> PyTree[Array]:
-        x = self.bijector.inverse(value)
-
-        # 1. Use JVP to dynamically determine the local sign of the derivative
-        ones = jax.tree_util.tree_map(jnp.ones_like, x)
-        _, jvp_val = jax.jvp(self.bijector.forward, (x,), (ones,))
-        is_increasing = jax.tree_util.tree_map(lambda j: j > 0, jvp_val)
-
-        # 2. Evaluate both base probabilities
-        base_cdf = self.distribution.cdf(x)
-        base_survival = self.distribution.survival_function(x)
-
-        # 3. Route based on monotonicity
-        return jax.tree_util.tree_map(
-            lambda inc, b_cdf, b_surv: jnp.where(inc, b_cdf, b_surv),
-            is_increasing,
-            base_cdf,
-            base_survival,
-        )
+        raise NotImplementedError
 
     def kl_divergence(self, other_dist, **kwargs) -> Array:
         """Obtains the KL divergence between two Transformed distributions.
