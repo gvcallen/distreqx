@@ -29,5 +29,6 @@ from ._split import Split as Split
 from ._split_coupling import SplitCoupling as SplitCoupling
 from ._tanh import Tanh as Tanh
 from ._tranpose import Transpose as Transpose
+from ._treemap import TreeMap as TreeMap
 from ._triangular_linear import TriangularLinear as TriangularLinear
 from ._unconstrained_affine import UnconstrainedAffine as UnconstrainedAffine
