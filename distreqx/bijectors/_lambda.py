@@ -20,12 +20,11 @@ class Lambda(
     AbstractFwdLogDetJacBijector,
     strict=True,
 ):
-    """Wrapper to automatically turn JAX functions into fully fledged bijectors.
+    """Wrapper to automatically turn JAX functions into bijectors.
 
-    This class takes in JAX functions that implement bijector methods and
+    This class takes in callables that implement individual bijector methods and
     constructs a bijector out of them. Any functions not explicitly specified
-    by the user will be automatically derived from the existing functions where
-    possible, by tracing their JAXPR representation during initialization.
+    will either be looked up or automatically derived using autodiff.
     """
 
     _fn_forward: Callable[[PyTree], PyTree]
@@ -44,7 +43,19 @@ class Lambda(
         inverse_log_det_jacobian: Optional[Callable[[PyTree], PyTree]] = None,
         is_constant_jacobian: Optional[bool] = None,
     ):
-        """Initializes a Lambda bijector and eagerly derives missing methods."""
+        r"""Initializes a Lambda bijector and eagerly derives missing methods.
+
+        **Arguments:**
+
+        - `forward`: a callable implementing the forward transformation $y = f(x)$.
+        - `inverse`: a callable implementing the inverse transformation $x = f^{-1}(y)$.
+        - `forward_log_det_jacobian`: a callable computing $\log|\det J(f)(x)|$. If not
+            provided, it will be automatically derived from `forward`.
+        - `inverse_log_det_jacobian`: a callable computing $\log|\det J(f^{-1})(y)|$.
+            If not provided, it will be automatically derived from `inverse`.
+        - `is_constant_jacobian`: a boolean indicating if the Jacobian is constant.
+            If `None`, it is automatically inferred by tracing the provided functions.
+        """
         if forward is None and inverse is None:
             raise ValueError(
                 "The Lambda bijector requires at least one of `forward` "
