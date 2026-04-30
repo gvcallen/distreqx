@@ -20,6 +20,7 @@ from ._rational_quadratic_spline import (
     RationalQuadraticSpline as RationalQuadraticSpline,
 )
 from ._reshape import Reshape as Reshape
+from ._restructure import Restructure as Restructure
 from ._scalar_affine import ScalarAffine as ScalarAffine
 from ._shift import Shift as Shift
 from ._sigmoid import Sigmoid as Sigmoid
