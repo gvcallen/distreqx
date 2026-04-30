@@ -7,6 +7,10 @@ from ._bijector import (
 from ._block import Block as Block
 from ._chain import Chain as Chain
 from ._diag_linear import DiagLinear as DiagLinear
+from ._exp import Exp as Exp
+from ._identity import Identity as Identity
+from ._indexed import Indexed as Indexed
+from ._inverse import Inverse as Inverse
 from ._lambda import Lambda as Lambda
 from ._linear import AbstractLinearBijector as AbstractLinearBijector
 from ._masked_coupling import MaskedCoupling as MaskedCoupling
