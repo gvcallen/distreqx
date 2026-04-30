@@ -3,14 +3,14 @@ from jaxtyping import Array
 
 from ._bijector import (
     AbstractBijector,
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractFwdLogDetJacBijector,
     AbstractInvLogDetJacBijector,
 )
 
 
 class R2ToComplex(
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
     strict=True,

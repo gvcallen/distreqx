@@ -8,14 +8,14 @@ from jaxtyping import PyTree
 from ..utils import transformations
 from ._bijector import (
     AbstractBijector,
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractFwdLogDetJacBijector,
     AbstractInvLogDetJacBijector,
 )
 
 
 class Lambda(
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
     strict=True,

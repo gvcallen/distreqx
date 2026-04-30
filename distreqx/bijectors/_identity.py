@@ -4,14 +4,14 @@ from jaxtyping import PyTree
 
 from ._bijector import (
     AbstractBijector,
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractFwdLogDetJacBijector,
     AbstractInvLogDetJacBijector,
 )
 
 
 class Identity(
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
     strict=True,

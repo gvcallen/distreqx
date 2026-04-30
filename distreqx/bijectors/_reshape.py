@@ -6,14 +6,14 @@ from jaxtyping import Array
 
 from ._bijector import (
     AbstractBijector,
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractFwdLogDetJacBijector,
     AbstractInvLogDetJacBijector,
 )
 
 
 class Reshape(
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
     strict=True,

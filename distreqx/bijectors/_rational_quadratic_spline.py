@@ -5,7 +5,7 @@ from jaxtyping import Array
 
 from ._bijector import (
     AbstractBijector,
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractFwdLogDetJacBijector,
     AbstractInvLogDetJacBijector,
 )
@@ -168,7 +168,7 @@ def _rational_quadratic_spline_inv(
 
 
 class RationalQuadraticSpline(
-    AbstractFowardInverseBijector,
+    AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
     strict=True,
