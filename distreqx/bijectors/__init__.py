@@ -24,6 +24,7 @@ from ._scalar_affine import ScalarAffine as ScalarAffine
 from ._shift import Shift as Shift
 from ._sigmoid import Sigmoid as Sigmoid
 from ._softplus import Softplus as Softplus
+from ._split import Split as Split
 from ._split_coupling import SplitCoupling as SplitCoupling
 from ._tanh import Tanh as Tanh
 from ._tranpose import Transpose as Transpose
