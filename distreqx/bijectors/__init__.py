@@ -22,6 +22,7 @@ from ._rational_quadratic_spline import (
 from ._reshape import Reshape as Reshape
 from ._restructure import Restructure as Restructure
 from ._scalar_affine import ScalarAffine as ScalarAffine
+from ._scale import Scale as Scale
 from ._shift import Shift as Shift
 from ._sigmoid import Sigmoid as Sigmoid
 from ._softplus import Softplus as Softplus
