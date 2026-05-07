@@ -20,6 +20,7 @@ from ._improper_uniform import ImproperUniform as ImproperUniform
 from ._independent import Independent as Independent
 from ._joint import Joint as Joint
 from ._logistic import Logistic as Logistic
+from ._lognormal import LogNormal as LogNormal
 from ._mixture_same_family import MixtureSameFamily as MixtureSameFamily
 from ._mvn_diag import MultivariateNormalDiag as MultivariateNormalDiag
 from ._mvn_from_bijector import (
