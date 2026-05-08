@@ -12,6 +12,7 @@ from ._identity import Identity as Identity
 from ._indexed import Indexed as Indexed
 from ._inverse import Inverse as Inverse
 from ._lambda import Lambda as Lambda
+from ._leafwise import Leafwise as Leafwise
 from ._linear import AbstractLinearBijector as AbstractLinearBijector
 from ._masked_coupling import MaskedCoupling as MaskedCoupling
 from ._permute import Permute as Permute
@@ -30,6 +31,5 @@ from ._split import Split as Split
 from ._split_coupling import SplitCoupling as SplitCoupling
 from ._tanh import Tanh as Tanh
 from ._tranpose import Transpose as Transpose
-from ._treemap import TreeMap as TreeMap
 from ._triangular_linear import TriangularLinear as TriangularLinear
 from ._unconstrained_affine import UnconstrainedAffine as UnconstrainedAffine
