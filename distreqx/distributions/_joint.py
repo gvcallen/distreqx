@@ -12,7 +12,7 @@ def _is_dist(x: Any) -> bool:
     return isinstance(x, AbstractDistribution)
 
 
-class Joint(AbstractDistribution, strict=True):
+class Joint(AbstractDistribution):
     """Joint distribution over a PyTree of statistically independent distributions.
 
     Samples from the Joint distribution take the form of a PyTree structure that
@@ -44,6 +44,17 @@ class Joint(AbstractDistribution, strict=True):
         return jax.tree_util.tree_map(
             lambda dist: dist.event_shape, self.distributions, is_leaf=_is_dist
         )
+
+    @property
+    def support(self) -> tuple[PyTree[Array], PyTree[Array]]:
+        """See `Distribution.support`."""
+        lower = jax.tree_util.tree_map(
+            lambda dist: dist.support[0], self.distributions, is_leaf=_is_dist
+        )
+        upper = jax.tree_util.tree_map(
+            lambda dist: dist.support[1], self.distributions, is_leaf=_is_dist
+        )
+        return lower, upper
 
     def sample_and_log_prob(self, key: Key[Array, ""]) -> tuple[PyTree[Array], Array]:
         """Returns a joint sample and its total log prob."""

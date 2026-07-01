@@ -14,7 +14,6 @@ class Indexed(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Applies a bijector to a specific subset of indices of an input array."""
 

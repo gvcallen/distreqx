@@ -16,7 +16,6 @@ class Reshape(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """A bijector that reshapes the input array."""
 

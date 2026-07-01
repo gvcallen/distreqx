@@ -14,7 +14,6 @@ class Identity(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Identity bijector: y = x."""
 

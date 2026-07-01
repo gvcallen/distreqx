@@ -16,7 +16,6 @@ class Split(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """A bijector that splits a single array into a tuple of arrays along an axis.
 

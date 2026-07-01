@@ -6,7 +6,6 @@ from ._distribution import AbstractDistribution
 
 class ImproperUniform(
     AbstractDistribution,
-    strict=True,
 ):
     """Improper Uniform distribution over the entire real line.
 
@@ -20,6 +19,17 @@ class ImproperUniform(
     @property
     def event_shape(self) -> tuple[int, ...]:
         return self.shape
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`.
+
+        The improper uniform is defined over the entire real line.
+        """
+        return (
+            jnp.full(self.shape, -jnp.inf),
+            jnp.full(self.shape, jnp.inf),
+        )
 
     def sample(self, key: Key[Array, ""]) -> Array:
         """Sampling is not defined for improper distributions."""

@@ -8,7 +8,7 @@ from jaxtyping import Array, Key, PyTree
 from ._distribution import AbstractDistribution
 
 
-class AbstractEmpirical(AbstractDistribution, strict=True):
+class AbstractEmpirical(AbstractDistribution):
     """
     Abstract base class for Empirical and WeightedEmpirical distributions.
 
@@ -30,6 +30,14 @@ class AbstractEmpirical(AbstractDistribution, strict=True):
     def event_shape(self) -> tuple:
         """Shape of the event (all dimensions after the sample count)."""
         return self.samples.shape[1:]
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`.
+
+        The empirical measure's support is bounded by its observed samples.
+        """
+        return jnp.min(self.samples, axis=0), jnp.max(self.samples, axis=0)
 
     def _event_axes(self) -> tuple:
         """Returns the axes corresponding to the event dimensions."""
@@ -148,7 +156,7 @@ class AbstractEmpirical(AbstractDistribution, strict=True):
         )
 
 
-class Empirical(AbstractEmpirical, strict=True):
+class Empirical(AbstractEmpirical):
     """Scalar or Multivariate Empirical distribution."""
 
     samples: Array
@@ -174,7 +182,7 @@ class Empirical(AbstractEmpirical, strict=True):
         return jnp.ones(n, dtype=self.samples.dtype) / n
 
 
-class WeightedEmpirical(AbstractEmpirical, strict=True):
+class WeightedEmpirical(AbstractEmpirical):
     """Scalar or Multivariate Weighted Empirical distribution."""
 
     samples: Array

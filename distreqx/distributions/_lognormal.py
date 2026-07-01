@@ -11,7 +11,7 @@ from ._distribution import AbstractProbDistribution
 _half_log2pi = 0.5 * math.log(2 * math.pi)
 
 
-class LogNormal(AbstractProbDistribution, strict=True):
+class LogNormal(AbstractProbDistribution):
     """
     LogNormal distribution parameterized by
     `loc` and `scale` of the underlying Normal.
@@ -35,6 +35,12 @@ class LogNormal(AbstractProbDistribution, strict=True):
     def event_shape(self) -> tuple[int, ...]:
         """Shape of event of distribution samples."""
         return self.loc.shape
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`."""
+        dtype = jnp.result_type(self.loc, self.scale)
+        return (jnp.array(0.0, dtype=dtype), jnp.array(jnp.inf, dtype=dtype))
 
     def _sample_from_std_normal(self, key: Key[Array, ""]) -> Array:
         dtype = jnp.result_type(self.loc, self.scale)

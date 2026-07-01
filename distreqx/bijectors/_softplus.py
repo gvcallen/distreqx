@@ -14,7 +14,6 @@ class Softplus(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """
     Transforms the real line to the positive domain using

@@ -17,7 +17,6 @@ class Restructure(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """A bijector that restructures a PyTree of arrays.
 

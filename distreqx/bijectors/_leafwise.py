@@ -17,7 +17,7 @@ def _is_bijector(node: PyTree) -> bool:
     return isinstance(node, AbstractBijector)
 
 
-class Leafwise(AbstractFwdLogDetJacBijector, AbstractInvLogDetJacBijector, strict=True):
+class Leafwise(AbstractFwdLogDetJacBijector, AbstractInvLogDetJacBijector):
     """Applies a pytree of bijectors to a pytree of inputs.
 
     This behaves analogously to TensorFlow Probability's `JointMap`. It allows

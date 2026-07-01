@@ -7,7 +7,7 @@ from ._bijector import AbstractBijector
 from ._scalar_affine import AbstractScalarAffine
 
 
-class Scale(AbstractScalarAffine, strict=True):
+class Scale(AbstractScalarAffine):
     r"""Bijector that scales its input elementwise.
 
     The bijector is defined as follows:

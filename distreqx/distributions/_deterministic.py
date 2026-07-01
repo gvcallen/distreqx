@@ -4,7 +4,7 @@ from jaxtyping import Array, Key, PyTree
 from ._distribution import AbstractDistribution
 
 
-class Deterministic(AbstractDistribution, strict=True):
+class Deterministic(AbstractDistribution):
     """Scalar Deterministic distribution on the real line.
 
     Represents a distribution that places all its probability mass on a single
@@ -39,6 +39,14 @@ class Deterministic(AbstractDistribution, strict=True):
     def event_shape(self) -> tuple:
         """Shape of the event."""
         return ()
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`.
+
+        A Deterministic distribution places all its mass on `loc`.
+        """
+        return (self.loc, self.loc)
 
     @property
     def slack(self) -> Array:

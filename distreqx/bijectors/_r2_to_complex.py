@@ -13,7 +13,6 @@ class R2ToComplex(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Maps a real array of shape (..., 2) to a complex array of shape (...)."""
 

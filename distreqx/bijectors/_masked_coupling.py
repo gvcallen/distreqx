@@ -17,7 +17,6 @@ class MaskedCoupling(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Coupling bijector that uses a mask to specify which inputs are transformed."""
 

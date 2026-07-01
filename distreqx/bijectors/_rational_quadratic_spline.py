@@ -171,7 +171,6 @@ class RationalQuadraticSpline(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """A rational-quadratic spline bijector."""
 

@@ -14,7 +14,6 @@ class Permute(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Permutation bijector that reorders the elements of a 1D event."""
 

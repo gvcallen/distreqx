@@ -14,7 +14,6 @@ class Transpose(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """A bijector that transposes the dimensions of the input array."""
 

@@ -17,7 +17,6 @@ class SplitCoupling(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Split coupling bijector, with arbitrary conditioner & inner bijector."""
 

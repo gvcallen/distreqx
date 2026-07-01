@@ -12,7 +12,7 @@ _half_log2pi = 0.5 * math.log(2 * math.pi)
 _inv_sqrt_2pi = 1.0 / math.sqrt(2 * math.pi)
 
 
-class TruncatedNormal(AbstractProbDistribution, strict=True):
+class TruncatedNormal(AbstractProbDistribution):
     """
     Truncated Normal distribution with `loc`, `scale`,
     `low`, and `high` parameters.
@@ -44,6 +44,11 @@ class TruncatedNormal(AbstractProbDistribution, strict=True):
         return jnp.broadcast_shapes(
             self.loc.shape, self.scale.shape, self.low.shape, self.high.shape
         )
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`."""
+        return (self.low, self.high)
 
     def _standardize(self, value: Array) -> Array:
         return (value - self.loc) / self.scale

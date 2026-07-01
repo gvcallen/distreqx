@@ -13,7 +13,6 @@ class Exp(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Exponential bijector: y = exp(x)."""
 

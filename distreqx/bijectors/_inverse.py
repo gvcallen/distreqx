@@ -8,7 +8,7 @@ from ._bijector import (
 )
 
 
-class Inverse(AbstractFwdLogDetJacBijector, AbstractInvLogDetJacBijector, strict=True):
+class Inverse(AbstractFwdLogDetJacBijector, AbstractInvLogDetJacBijector):
     """Inverted version of a given bijector."""
 
     bijector: AbstractBijector

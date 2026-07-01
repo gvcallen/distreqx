@@ -18,7 +18,6 @@ class Lambda(
     AbstractForwardInverseBijector,
     AbstractInvLogDetJacBijector,
     AbstractFwdLogDetJacBijector,
-    strict=True,
 ):
     """Wrapper to automatically turn JAX functions into bijectors.
 
