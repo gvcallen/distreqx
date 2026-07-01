@@ -7,7 +7,7 @@ import jax.numpy as jnp
 import numpy as np
 from parameterized import parameterized  # type: ignore
 
-from distreqx.bijectors import R2ToComplex
+from distreqx.bijectors import Chain, Inverse, R2ToComplex
 
 
 class R2ToComplexTest(TestCase):
@@ -71,3 +71,39 @@ class R2ToComplexTest(TestCase):
     def test_same_as(self):
         same_bij = R2ToComplex()
         self.assertTrue(self.bij.same_as(same_bij))
+
+    @parameterized.expand(
+        [
+            ("float32", jnp.float32, jnp.complex64),
+            ("float64", jnp.float64, jnp.complex128),
+        ]
+    )
+    def test_forward_inverse_round_trip(self, name, real_dtype, comp_dtype):
+        # forward then inverse should recover the original real input exactly,
+        # confirming the mapping is a genuine bijection (not just type punning).
+        x = jnp.array([[1.0, -2.5], [0.0, 3.0], [-4.0, -4.0]], dtype=real_dtype)
+        y, _ = self.bij.forward_and_log_det(x)
+        x_rec, _ = self.bij.inverse_and_log_det(y)
+        self.assertion_fn()(x_rec, x)
+        self.assertEqual(x_rec.dtype, real_dtype)
+
+        # inverse then forward should recover the original complex input.
+        z = jnp.array([1.0 - 2.5j, 3.0 + 0.5j], dtype=comp_dtype)
+        x2, _ = self.bij.inverse_and_log_det(z)
+        z_rec, _ = self.bij.forward_and_log_det(x2)
+        self.assertion_fn()(z_rec, z)
+        self.assertEqual(z_rec.dtype, comp_dtype)
+
+    def test_chaining(self):
+        # Chaining R2ToComplex with its own Inverse should round-trip through
+        # the complex representation and behave as the identity overall.
+        chain = Chain([Inverse(R2ToComplex()), R2ToComplex()])
+        x = jnp.array([[1.0, 2.0], [-3.0, 4.5]])
+
+        y, log_det = chain.forward_and_log_det(x)
+        self.assertion_fn()(y, x)
+        self.assertion_fn()(log_det, jnp.zeros(()))
+
+        x_rec, inv_log_det = chain.inverse_and_log_det(x)
+        self.assertion_fn()(x_rec, x)
+        self.assertion_fn()(inv_log_det, jnp.zeros(()))
