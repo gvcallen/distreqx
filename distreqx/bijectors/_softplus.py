@@ -20,8 +20,8 @@ class Softplus(
     softplus y = log(1 + exp(x)).
     """
 
-    _is_constant_jacobian: bool = True
-    _is_constant_log_det: bool = True
+    _is_constant_jacobian: bool = False
+    _is_constant_log_det: bool = False
 
     def forward_and_log_det(self, x: Array) -> tuple[Array, Array]:
         """Computes y = softplus(x) and log|det J(f)(x)|."""

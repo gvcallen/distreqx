@@ -38,6 +38,16 @@ class ExpTest(TestCase):
         self.assertEqual(x.dtype, dtype)
         self.assertEqual(log_det.dtype, dtype)
 
+    @parameterized.expand([("float32", jnp.float32), ("float64", jnp.float64)])
+    def test_forward_and_inverse(self, name, dtype):
+        # Round-trip: inverse(forward(x)) == x, matching the softplus tests.
+        x = jnp.array([-5.0, 0.0, 5.0], dtype=dtype)
+        y, log_det_fwd = self.bij.forward_and_log_det(x)
+
+        x_rec, log_det_inv = self.bij.inverse_and_log_det(y)
+        self.assertion_fn()(x_rec, x)
+        self.assertion_fn()(log_det_inv, -log_det_fwd)
+
     def test_jittable(self):
         @eqx.filter_jit
         def f(bij, x):
