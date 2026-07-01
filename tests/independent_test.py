@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from distreqx.distributions import Independent, MultivariateNormalTri, Normal
+from distreqx.distributions import Bernoulli, Independent, MultivariateNormalTri, Normal
 
 
 class IndependentTest(TestCase):
@@ -33,25 +33,10 @@ class IndependentTest(TestCase):
         )
         return batch_mvn, locs, scales_tri
 
-    # --- 1. Basic & Legacy Tests ---
-
     def test_constructor_is_jittable_given_ndims(self):
         constructor = lambda d: Independent(d)
         model = eqx.filter_jit(constructor)(self.base)
         self.assertIsInstance(model, Independent)
-
-    def test_legacy_broadcasting_behavior(self):
-        """Tests the reinterpreted_batch_ndims=0 fallback for standard distributions."""
-        xs = jnp.ones((2, 3, 4))
-
-        # event_shape should perfectly match the base distribution
-        self.assertEqual(self.dist.event_shape, self.base.event_shape)
-
-        # log_prob should sum over all leaves via _reduce_helper
-        expected_log_prob = jnp.sum(self.base.log_prob(xs))
-        self.assertion_fn()(self.dist.log_prob(xs), expected_log_prob)
-
-    # --- 2. Shape Inference Tests ---
 
     def test_mapped_event_shape_inference(self):
         """
@@ -60,7 +45,6 @@ class IndependentTest(TestCase):
         """
         M, N, D = 20, 10, 3
 
-        # --- Test 1D reinterpretation ---
         # Create a distribution vmapped exactly ONCE
         locs_1d = jnp.zeros((M, D))
         scales_tri_1d = jnp.stack([jnp.tri(D)] * M, axis=0).reshape(M, D, D)
@@ -71,14 +55,11 @@ class IndependentTest(TestCase):
             indep_1d.event_shape, (M, D)
         )  # (20, 3) because base is (3,) and 1st vmap is over M
 
-        # --- Test 2D reinterpretation ---
         # Create a distribution vmapped exactly TWICE using our helper
         batch_mvn_2d, _, _ = self._create_vmapped_mvn(M, N, D)
 
         indep_2d = Independent(batch_mvn_2d, reinterpreted_batch_ndims=2)
         self.assertEqual(indep_2d.event_shape, (M, N, D))  # (20, 10, 3)
-
-    # --- 3. Log Prob & Sampling Equivalence Tests ---
 
     def test_multiple_reinterpret_log_prob(self):
         """Tests that stacked mapped log_probs evaluate correctly."""
@@ -119,8 +100,6 @@ class IndependentTest(TestCase):
         expected_log_probs = mvn.log_prob(samples)
         self.assertion_fn()(log_probs, expected_log_probs)
 
-    # --- 4. Moments & Descriptors ---
-
     def test_moments_and_entropy(self):
         """Tests that moments map correctly and entropy sums over the right axes."""
         M, N, D = 5, 4, 3
@@ -139,8 +118,6 @@ class IndependentTest(TestCase):
         # Entropy should be summed over the 2 reinterpreted dimensions
         entropy = mvn.entropy()
         self.assertEqual(entropy.shape, ())  # Reduced to scalar
-
-    # --- 5. KL Divergence ---
 
     def test_kl_divergence(self):
         """
@@ -169,7 +146,43 @@ class IndependentTest(TestCase):
         self.assertEqual(kl_pq.shape, ())
         self.assertTrue(kl_pq > 0.0)  # KL should be strictly positive
 
-    # --- 6. Execution & JIT Safety ---
+    def test_reinterpretation_across_distribution_types(self):
+        """Checks reinterpretation doesn't misbehave for natively-broadcasting
+        distributions other than Normal (e.g. discrete distributions like
+        Bernoulli), not just the vmap-constructed MultivariateNormalTri case."""
+        M, N = 5, 4
+
+        bernoulli = Bernoulli(probs=jnp.full((M, N), 0.3))
+        indep_bernoulli = Independent(bernoulli, reinterpreted_batch_ndims=2)
+        self.assertEqual(indep_bernoulli.event_shape, (M, N))
+
+        xs = jnp.ones((M, N))
+        expected_log_prob = jnp.sum(bernoulli.log_prob(xs))
+        self.assertion_fn()(indep_bernoulli.log_prob(xs), expected_log_prob)
+
+        sample = indep_bernoulli.sample(self.key)
+        self.assertEqual(sample.shape, (M, N))
+
+        mean = indep_bernoulli.mean()
+        self.assertEqual(mean.shape, (M, N))
+
+        normal = Normal(loc=jnp.zeros((M, N)), scale=jnp.ones((M, N)))
+        indep_normal = Independent(normal, reinterpreted_batch_ndims=1)
+        self.assertEqual(indep_normal.event_shape, (M, N))
+        self.assertion_fn()(
+            indep_normal.log_prob(xs), jnp.sum(normal.log_prob(xs), axis=0)
+        )
+
+    def test_kl_divergence_requires_matching_reinterpreted_batch_ndims(self):
+        # Same underlying (natively-broadcasting) distribution and event_shape,
+        # but reinterpreted over a different number of axes.
+        normal = Normal(loc=jnp.zeros((5, 4)), scale=jnp.ones((5, 4)))
+        p = Independent(normal, reinterpreted_batch_ndims=2)
+        q = Independent(normal, reinterpreted_batch_ndims=1)
+        self.assertEqual(p.event_shape, q.event_shape)
+
+        with self.assertRaisesRegex(ValueError, "reinterpreted_batch_ndims"):
+            p.kl_divergence(q)
 
     def test_methods_are_jittable(self):
         """Ensures that wrapped mapping logic survives JAX compilation."""
