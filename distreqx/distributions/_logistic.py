@@ -9,7 +9,7 @@ from jaxtyping import Array, Float, Key
 from ._distribution import AbstractProbDistribution
 
 
-class Logistic(AbstractProbDistribution, strict=True):
+class Logistic(AbstractProbDistribution):
     """Logistic distribution with location `loc` and `scale` parameters."""
 
     loc: Float[Array, "..."]
@@ -30,6 +30,12 @@ class Logistic(AbstractProbDistribution, strict=True):
     def event_shape(self) -> tuple[int, ...]:
         """Shape of event of distribution samples."""
         return self.loc.shape
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`."""
+        dtype = jnp.result_type(self.loc, self.scale)
+        return (jnp.array(-jnp.inf, dtype=dtype), jnp.array(jnp.inf, dtype=dtype))
 
     def _standardize(self, value: Array) -> Array:
         return (value - self.loc) / self.scale

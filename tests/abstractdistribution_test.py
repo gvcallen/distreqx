@@ -14,7 +14,6 @@ class AbstractAll(
     _distribution.AbstractSampleLogProbDistribution,
     _distribution.AbstractCDFDistribution,
     _distribution.AbstractProbDistribution,
-    strict=True,
 ):
     pass
 
@@ -31,6 +30,10 @@ class DummyUnivariateDist(AbstractAll):
     @property
     def event_shape(self):
         return (1,)
+
+    @property
+    def support(self):
+        raise NotImplementedError
 
     def entropy(self):
         raise NotImplementedError
@@ -71,6 +74,10 @@ class DummyMultivariateDist(AbstractAll):
     @property
     def event_shape(self):
         return self._dimension
+
+    @property
+    def support(self):
+        raise NotImplementedError
 
     def entropy(self):
         raise NotImplementedError

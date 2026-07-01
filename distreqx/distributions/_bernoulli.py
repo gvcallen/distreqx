@@ -18,7 +18,6 @@ class Bernoulli(
     AbstractSampleLogProbDistribution,
     AbstractSTDDistribution,
     AbstractSurvivalDistribution,
-    strict=True,
 ):
     """Bernoulli distribution of shape dims.
 
@@ -76,6 +75,15 @@ class Bernoulli(
     @property
     def event_shape(self) -> tuple[int, ...]:
         return self.probs.shape
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`.
+
+        The Bernoulli is discrete on `{0, 1}`.
+        """
+        dtype = self.probs.dtype
+        return (jnp.array(0.0, dtype=dtype), jnp.array(1.0, dtype=dtype))
 
     def _log_probs_parameter(self) -> tuple[Array, Array]:
         if self._logits is None:

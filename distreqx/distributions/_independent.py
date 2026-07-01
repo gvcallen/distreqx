@@ -26,7 +26,6 @@ class Independent(
     AbstractProbDistribution,
     AbstractCDFDistribution,
     AbstractSurvivalDistribution,
-    strict=True,
 ):
     """Independent distribution obtained from child distributions.
 
@@ -89,6 +88,11 @@ class Independent(
         """See `Distribution.event_shape`."""
         event_shape = self._infer_shapes_and_dtype()[0]
         return event_shape
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`."""
+        return self.distribution.support
 
     def sample(self, key: Key[Array, ""]) -> Array:
         """See `Distribution.sample`."""

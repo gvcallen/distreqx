@@ -35,9 +35,15 @@ def _check_input_parameters_are_valid(
         )
 
 
-class AbstractMultivariateNormalFromBijector(AbstractTransformed, strict=True):
+class AbstractMultivariateNormalFromBijector(AbstractTransformed):
     loc: eqx.AbstractVar[Array]
     scale: eqx.AbstractVar[AbstractLinearBijector]
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`."""
+        dtype = self.loc.dtype
+        return (jnp.array(-jnp.inf, dtype=dtype), jnp.array(jnp.inf, dtype=dtype))
 
     def mean(self) -> Array:
         """Calculates the mean."""

@@ -3,14 +3,14 @@
 from abc import abstractmethod
 
 import jax
+from ihoop.eqx import AbstractStrictModule
 from jax import numpy as jnp
 from jaxtyping import Array, Key, PyTree
 
-from .._custom_meta import AbstractStrictModule
 from .._custom_types import EventT
 
 
-class AbstractDistribution(AbstractStrictModule, strict=True):
+class AbstractDistribution(AbstractStrictModule):
     """Base class for all distreqx distributions."""
 
     @abstractmethod
@@ -54,6 +54,12 @@ class AbstractDistribution(AbstractStrictModule, strict=True):
     @abstractmethod
     def event_shape(self) -> EventT:
         """Shape of event of distribution samples."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def support(self) -> tuple[PyTree[Array], PyTree[Array]]:
+        """Range `(lower, upper)` spanning the distribution's support."""
         raise NotImplementedError
 
     @property
@@ -226,7 +232,7 @@ class AbstractDistribution(AbstractStrictModule, strict=True):
         return self.kl_divergence(other_dist, **kwargs) + self.entropy()
 
 
-class AbstractSampleLogProbDistribution(AbstractDistribution, strict=True):
+class AbstractSampleLogProbDistribution(AbstractDistribution):
     """Abstract distribution + concrete `sample_and_log_prob`."""
 
     def sample_and_log_prob(
@@ -254,7 +260,7 @@ class AbstractSampleLogProbDistribution(AbstractDistribution, strict=True):
         return samples, log_prob
 
 
-class AbstractProbDistribution(AbstractDistribution, strict=True):
+class AbstractProbDistribution(AbstractDistribution):
     """Abstract distribution + concrete `prob`."""
 
     def prob(self, value: PyTree[Array]) -> PyTree[Array]:
@@ -271,7 +277,7 @@ class AbstractProbDistribution(AbstractDistribution, strict=True):
         return jnp.exp(self.log_prob(value))
 
 
-class AbstractCDFDistribution(AbstractDistribution, strict=True):
+class AbstractCDFDistribution(AbstractDistribution):
     """Abstract distribution + concrete `cdf`."""
 
     def cdf(self, value: PyTree[Array]) -> PyTree[Array]:
@@ -288,7 +294,7 @@ class AbstractCDFDistribution(AbstractDistribution, strict=True):
         return jnp.exp(self.log_cdf(value))
 
 
-class AbstractSTDDistribution(AbstractDistribution, strict=True):
+class AbstractSTDDistribution(AbstractDistribution):
     """Abstract distribution + concrete `stddev`."""
 
     def stddev(self) -> PyTree[Array]:
@@ -296,7 +302,7 @@ class AbstractSTDDistribution(AbstractDistribution, strict=True):
         return jnp.sqrt(self.variance())
 
 
-class AbstractSurvivalDistribution(AbstractDistribution, strict=True):
+class AbstractSurvivalDistribution(AbstractDistribution):
     """Abstract distribution + concrete `survival_function` and
     `log_survival_function`."""
 

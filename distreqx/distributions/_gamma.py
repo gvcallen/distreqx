@@ -17,7 +17,6 @@ class Gamma(
     AbstractSampleLogProbDistribution,
     AbstractProbDistribution,
     AbstractSurvivalDistribution,
-    strict=True,
 ):
     r"""Gamma distribution with parameters `concentration` and `rate`.
 
@@ -53,6 +52,12 @@ class Gamma(
     @property
     def event_shape(self) -> tuple:
         return ()
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`."""
+        dtype = jnp.result_type(self.concentration, self.rate)
+        return (jnp.array(0.0, dtype=dtype), jnp.array(jnp.inf, dtype=dtype))
 
     def sample(self, key: Key[Array, ""]) -> Array:
         """See `Distribution.sample`."""

@@ -18,7 +18,6 @@ class Categorical(
     AbstractSTDDistribution,
     AbstractSampleLogProbDistribution,
     AbstractSurvivalDistribution,
-    strict=True,
 ):
     """Categorical distribution over integers.
 
@@ -55,6 +54,18 @@ class Categorical(
     def event_shape(self) -> tuple:
         """Shape of event of distribution samples."""
         return ()
+
+    @property
+    def support(self) -> tuple[Array, Array]:
+        """See `Distribution.support`.
+
+        The Categorical is discrete on `{0, ..., K-1}`.
+        """
+        dtype = self.probs.dtype
+        return (
+            jnp.array(0.0, dtype=dtype),
+            jnp.array(self.num_categories - 1, dtype=dtype),
+        )
 
     @property
     def logits(self) -> Array:
