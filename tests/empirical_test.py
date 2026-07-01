@@ -2,9 +2,6 @@ from unittest import TestCase
 
 import jax
 
-# Must be set before any JAX arrays are initialized
-jax.config.update("jax_enable_x64", True)
-
 import equinox as eqx
 import jax.numpy as jnp
 import numpy as np
@@ -85,6 +82,25 @@ class EmpiricalTest(TestCase):
         entropy, mode = f(dist)
         self.assertIsInstance(entropy, jax.Array)
         self.assertIsInstance(mode, jax.Array)
+
+    def test_atol_tolerance(self):
+        samples = jnp.array([1.0, 1.0, 1.0, 5.0])
+        dist = Empirical(samples=samples, atol=0.2)
+
+        # Within absolute tolerance of the samples at 1.0.
+        self.assertion_fn()(dist.prob(jnp.array(1.1)), 0.75)
+        self.assertion_fn()(dist.cdf(jnp.array(1.1)), 0.75)
+        # Outside the tolerance window entirely.
+        self.assertion_fn()(dist.prob(jnp.array(3.0)), 0.0)
+
+    def test_rtol_tolerance(self):
+        samples = jnp.array([1.0, 1.0, 1.0, 100.0])
+        dist = Empirical(samples=samples, rtol=0.1)
+
+        # 100 * 0.1 = 10 slack, so 105 matches the 100.0 sample but not the 1.0s.
+        self.assertion_fn()(dist.prob(jnp.array(105.0)), 0.25)
+        # 1 * 0.1 = 0.1 slack, too small to match 100.0 from near 1.0.
+        self.assertion_fn()(dist.prob(jnp.array(1.05)), 0.75)
 
 
 class WeightedEmpiricalTest(TestCase):

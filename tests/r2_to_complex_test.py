@@ -2,9 +2,6 @@ from unittest import TestCase
 
 import jax
 
-# Must be set before any JAX arrays are initialized
-jax.config.update("jax_enable_x64", True)
-
 import equinox as eqx
 import jax.numpy as jnp
 import numpy as np

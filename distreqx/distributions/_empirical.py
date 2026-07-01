@@ -5,10 +5,10 @@ import jax
 import jax.numpy as jnp
 from jaxtyping import Array, Key, PyTree
 
-from ._distribution import AbstractDistribution
+from ._distribution import AbstractSampleLogProbDistribution
 
 
-class AbstractEmpirical(AbstractDistribution):
+class AbstractEmpirical(AbstractSampleLogProbDistribution):
     """
     Abstract base class for Empirical and WeightedEmpirical distributions.
 
@@ -54,11 +54,6 @@ class AbstractEmpirical(AbstractDistribution):
         return jnp.where(
             self.rtol == 0, self.atol, self.atol + self.rtol * jnp.abs(value)
         )
-
-    def sample_and_log_prob(self, key: Key[Array, ""]) -> tuple[Array, Array]:
-        """Returns sample and its log prob."""
-        sample = self.sample(key)
-        return sample, self.log_prob(sample)
 
     def sample(self, key: Key[Array, ""]) -> Array:
         """Samples an event based on the normalized weights."""
