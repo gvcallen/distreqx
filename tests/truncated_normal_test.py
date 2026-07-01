@@ -6,6 +6,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from parameterized import parameterized  # type: ignore
+from scipy import stats
 
 from distreqx.distributions import TruncatedNormal
 
@@ -152,6 +153,41 @@ class TruncatedNormalTest(TestCase):
         dist = TruncatedNormal(*distr_params)
         result = getattr(dist, function_string)()
         self.assertEqual(distr_params[0].shape, result.shape)
+
+    @parameterized.expand(
+        [
+            ("loc within bounds", 0.5, 1.5, -1.0, 2.0),
+            ("loc outside bounds", 3.0, 1.0, -1.0, 1.0),
+            ("negative loc", -2.0, 0.5, -3.0, -1.5),
+        ]
+    )
+    def test_stats_match_scipy(self, name, loc, scale, low, high):
+        # Cross-check the closed-form moment/entropy formulas against scipy's
+        # reference implementation, not just their output shapes.
+        a, b = (low - loc) / scale, (high - loc) / scale
+        ref = stats.truncnorm(a, b, loc=loc, scale=scale)
+        dist = TruncatedNormal(
+            jnp.array(loc), jnp.array(scale), jnp.array(low), jnp.array(high)
+        )
+
+        np.testing.assert_allclose(dist.mean(), ref.mean(), rtol=1e-5)
+        np.testing.assert_allclose(dist.variance(), ref.var(), rtol=1e-5)
+        np.testing.assert_allclose(dist.stddev(), ref.std(), rtol=1e-5)
+        np.testing.assert_allclose(dist.entropy(), ref.entropy(), rtol=1e-4, atol=1e-5)
+        np.testing.assert_allclose(dist.median(), ref.median(), rtol=1e-5)
+
+        xs = np.linspace(low + 1e-3, high - 1e-3, 5)
+        jxs = jnp.asarray(xs, dtype=jnp.float32)
+        np.testing.assert_allclose(
+            dist.log_prob(jxs),
+            ref.logpdf(xs),  # pyright: ignore[reportAttributeAccessIssue]
+            rtol=1e-4,
+            atol=1e-5,
+        )
+        np.testing.assert_allclose(dist.cdf(jxs), ref.cdf(xs), rtol=1e-4, atol=1e-6)
+
+        expected_mode = np.clip(loc, low, high)
+        np.testing.assert_allclose(dist.mode(), expected_mode, rtol=1e-5)
 
     @parameterized.expand(
         [

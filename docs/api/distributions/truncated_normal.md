@@ -1,4 +1,4 @@
-# Normal
+# Truncated Normal
 
 ::: distreqx.distributions.TruncatedNormal
     options:
