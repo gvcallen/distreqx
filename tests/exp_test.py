@@ -6,7 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 from parameterized import parameterized  # type: ignore
 
-from distreqx.bijectors import Exp, Identity
+from distreqx.bijectors import Exp, Tanh
 
 
 class ExpTest(TestCase):
@@ -59,7 +59,7 @@ class ExpTest(TestCase):
 
     def test_same_as(self):
         same_bij = Exp()
-        diff_bij = Identity()
+        diff_bij = Tanh()
 
         self.assertTrue(self.bij.same_as(same_bij))
         self.assertFalse(self.bij.same_as(diff_bij))

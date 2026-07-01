@@ -6,7 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 from parameterized import parameterized  # type: ignore
 
-from distreqx.bijectors import Chain, Inverse, R2ToComplex
+from distreqx.bijectors import Chain, R2ToComplex, ScalarAffine
 
 
 class R2ToComplexTest(TestCase):
@@ -94,15 +94,19 @@ class R2ToComplexTest(TestCase):
         self.assertEqual(z_rec.dtype, comp_dtype)
 
     def test_chaining(self):
-        # Chaining R2ToComplex with its own Inverse should round-trip through
-        # the complex representation and behave as the identity overall.
-        chain = Chain([Inverse(R2ToComplex()), R2ToComplex()])
+        # Chain a real-valued affine transform ahead of R2ToComplex, to check
+        # R2ToComplex composes correctly as part of a larger bijector pipeline.
+        affine = ScalarAffine(shift=jnp.array(1.0), scale=jnp.array(2.0))
+        chain = Chain([R2ToComplex(), affine])
         x = jnp.array([[1.0, 2.0], [-3.0, 4.5]])
 
         y, log_det = chain.forward_and_log_det(x)
-        self.assertion_fn()(y, x)
-        self.assertion_fn()(log_det, jnp.zeros(()))
 
-        x_rec, inv_log_det = chain.inverse_and_log_det(x)
+        affine_out = affine.scale * x + affine.shift
+        expected_y = affine_out[..., 0] + 1j * affine_out[..., 1]
+        self.assertion_fn()(y, expected_y)
+        self.assertion_fn()(log_det, affine.forward_log_det_jacobian(x))
+
+        x_rec, inv_log_det = chain.inverse_and_log_det(y)
         self.assertion_fn()(x_rec, x)
-        self.assertion_fn()(inv_log_det, jnp.zeros(()))
+        self.assertion_fn()(inv_log_det, -affine.forward_log_det_jacobian(x))
