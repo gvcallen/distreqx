@@ -1,8 +1,7 @@
 from unittest import TestCase
 
-import jax
-
 import equinox as eqx
+import jax
 import jax.numpy as jnp
 import numpy as np
 from parameterized import parameterized  # type: ignore
