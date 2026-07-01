@@ -22,12 +22,12 @@ class Identity(
 
     def forward_and_log_det(self, x: PyTree) -> tuple[PyTree, PyTree]:
         """Computes y = x and log|det J(f)(x)| = 0."""
-        log_det = jax.tree_util.tree_map(jnp.zeros_like, x)
+        log_det = jax.tree.map(jnp.zeros_like, x)
         return x, log_det
 
     def inverse_and_log_det(self, y: PyTree) -> tuple[PyTree, PyTree]:
         """Computes x = y and log|det J(f^{-1})(y)| = 0."""
-        log_det = jax.tree_util.tree_map(jnp.zeros_like, y)
+        log_det = jax.tree.map(jnp.zeros_like, y)
         return y, log_det
 
     def same_as(self, other: AbstractBijector) -> bool:
