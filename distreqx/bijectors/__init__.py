@@ -14,6 +14,7 @@ from ._inverse import Inverse as Inverse
 from ._lambda import Lambda as Lambda
 from ._leafwise import Leafwise as Leafwise
 from ._linear import AbstractLinearBijector as AbstractLinearBijector
+from ._masked_autoregressive import MaskedAutoregressive as MaskedAutoregressive
 from ._masked_coupling import MaskedCoupling as MaskedCoupling
 from ._permute import Permute as Permute
 from ._r2_to_complex import R2ToComplex as R2ToComplex

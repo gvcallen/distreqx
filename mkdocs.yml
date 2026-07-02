@@ -132,6 +132,7 @@ nav:
             - 'api/bijectors/inverse.md'
             - 'api/bijectors/lambda.md'
             - 'api/bijectors/leafwise.md'
+            - 'api/bijectors/masked_autoregressive.md'
             - 'api/bijectors/permute.md'
             - 'api/bijectors/r2_to_complex.md'
             - 'api/bijectors/rational_quadratic_spline.md'
