@@ -16,6 +16,7 @@ from ._leafwise import Leafwise as Leafwise
 from ._linear import AbstractLinearBijector as AbstractLinearBijector
 from ._masked_coupling import MaskedCoupling as MaskedCoupling
 from ._permute import Permute as Permute
+from ._planar import Planar as Planar
 from ._r2_to_complex import R2ToComplex as R2ToComplex
 from ._rational_quadratic_spline import (
     RationalQuadraticSpline as RationalQuadraticSpline,

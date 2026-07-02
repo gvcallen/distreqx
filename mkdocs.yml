@@ -133,6 +133,7 @@ nav:
             - 'api/bijectors/lambda.md'
             - 'api/bijectors/leafwise.md'
             - 'api/bijectors/permute.md'
+            - 'api/bijectors/planar.md'
             - 'api/bijectors/r2_to_complex.md'
             - 'api/bijectors/rational_quadratic_spline.md'
             - 'api/bijectors/reshape.md'
