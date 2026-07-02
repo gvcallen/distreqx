@@ -8,7 +8,6 @@ import numpy as np
 
 from distreqx.bijectors import MaskedAutoregressive
 
-
 DIM = 4
 
 
