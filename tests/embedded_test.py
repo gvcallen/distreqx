@@ -30,21 +30,25 @@ class EmbeddedTest(TestCase):
                 fixed={"a": None, "b": jnp.array(1.0)},
             )
 
-    def test_invalid_parameters_both_sides_fixed(self):
+    def test_invalid_parameters_both_sides_claim_a_leaf(self):
         # Both `distribution` and `fixed` claim "a" as their own.
-        with self.assertRaisesRegex(ValueError, "must be complementary"):
+        with self.assertRaisesRegex(ValueError, "must not both provide a value"):
             Embedded(
                 Joint({"a": Normal(jnp.array(0.0), jnp.array(1.0)), "b": None}),
                 fixed={"a": jnp.array(1.0), "b": jnp.array(1.0)},
             )
 
-    def test_invalid_parameters_neither_side_fixed(self):
-        # Neither `distribution` nor `fixed` claims "b".
-        with self.assertRaisesRegex(ValueError, "must be complementary"):
-            Embedded(
-                Joint({"a": Normal(jnp.array(0.0), jnp.array(1.0)), "b": None}),
-                fixed={"a": None, "b": None},
-            )
+    def test_leaf_absent_from_both_sides_is_allowed(self):
+        # "b" is `None` on both sides: it simply doesn't exist for this
+        # instance of the model, and should stay `None` throughout.
+        dist = Embedded(
+            Joint({"a": Normal(jnp.array(0.0), jnp.array(1.0)), "b": None}),
+            fixed={"a": None, "b": None},
+        )
+        sample = dist.sample(self.key)
+        self.assertIsNone(sample["b"])
+        self.assertIsNone(dist.event_shape["b"])
+        self.assertIsNone(dist.mean()["b"])
 
     def test_sample_embeds_fixed_leaves(self):
         sample = self.dist.sample(self.key)
