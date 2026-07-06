@@ -111,6 +111,7 @@ nav:
             - 'api/distributions/beta.md'
             - 'api/distributions/categorical.md'
             - 'api/distributions/deterministic.md'
+            - 'api/distributions/embedded.md'
             - 'api/distributions/empirical.md'
             - 'api/distributions/gamma.md'
             - 'api/distributions/logistic.md'
