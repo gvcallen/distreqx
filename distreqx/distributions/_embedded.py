@@ -3,7 +3,7 @@
 from typing import Optional
 
 import jax.numpy as jnp
-import jax.tree_util as jtu
+import jax.tree
 from jaxtyping import Array, Key, PyTree
 
 from ._distribution import (
@@ -29,28 +29,16 @@ class Embedded(
     AbstractCDFDistribution,
     AbstractSurvivalDistribution,
 ):
-    r"""A distribution over the varying leaves of a pytree, with the rest held fixed.
+    r"""A distribution over a subset of a PyTree's leaves, with the rest held fixed.
 
-    Many models are a single pytree in which only some leaves are actually
-    random: the others are constants, frozen hyperparameters, or structural
-    metadata. `Embedded` lets a base distribution model just the random
-    leaves; the fixed leaves are slotted back in for `sample` and stripped out
-    again for `log_prob`, so the distribution speaks in terms of the whole
-    pytree even though it only describes part of it.
+    It is common to want to describe the distribution over only some leaves
+    in a PyTree, for example if some are considered random variables while
+    others are considered fixed/static. `Embedded` lets a base distribution
+    model only the random leaves, while the fixed leaves are added/removed
+    appropriately during `sample`, `log_prob` and other relevant methods.
 
-    Split the event pytree into varying leaves $z$ and fixed leaves $c$. The
-    base `distribution` models $z$; `fixed` gives the values of $c$, mirroring
-    the full pytree with `None` at every varying leaf. `distribution`'s own
-    event pytree (`event_shape`, `sample`, ...) must mirror `fixed` in turn,
-    with `None` at every fixed leaf and a real value at every varying one. A
-    leaf may be `None` on both sides if it simply doesn't exist for this
-    instance of the model.
-
-    $$\log p(z, c) = \log p(z)$$
-
-    since the fixed leaves are constants rather than observations, each
-    contributing $\log 1 = 0$, as with a `Deterministic` evaluated on its own
-    support.
+    Since the fixed leaves are constants rather than observations, each
+    are considered to have zero variances, and contribute zero log probability.
 
     ```python
     import jax
@@ -97,7 +85,7 @@ class Embedded(
         self.fixed = fixed
 
         try:
-            not_double_claimed = jtu.tree_map(
+            not_double_claimed = jax.tree.map(
                 lambda d, f: (d is None) or (f is None),
                 distribution.event_shape,
                 fixed,
@@ -108,7 +96,7 @@ class Embedded(
                 "`distribution.event_shape` and `fixed` must mirror the same "
                 "pytree structure (e.g. matching dict keys or list lengths)."
             ) from e
-        if not all(jtu.tree_leaves(not_double_claimed)):
+        if not all(jax.tree.leaves(not_double_claimed)):
             raise ValueError(
                 "`distribution` and `fixed` must not both provide a value at "
                 "the same leaf: at every leaf, at most one of "
@@ -124,13 +112,13 @@ class Embedded(
         """Fill the varying values into a fixed structure -> full pytree."""
         if fill is None:
             fill = self.fixed
-        return jtu.tree_map(
+        return jax.tree.map(
             lambda v, f: v if v is not None else f, varying, fill, is_leaf=is_leaf
         )
 
     def _project(self, full: PyTree) -> PyTree:
         """Drop the fixed leaves from a full pytree -> varying pytree."""
-        return jtu.tree_map(
+        return jax.tree.map(
             lambda f, v: None if f is not None else v,
             self.fixed,
             full,
@@ -169,7 +157,7 @@ class Embedded(
     def variance(self) -> PyTree:
         """Full pytree with the base variance at the varying leaves and `0` at
         the fixed leaves (constants don't vary)."""
-        zeros = jtu.tree_map(
+        zeros = jax.tree.map(
             lambda f: None if f is None else jnp.zeros_like(f),
             self.fixed,
             is_leaf=_is_none,
@@ -179,7 +167,7 @@ class Embedded(
     def stddev(self) -> PyTree:
         """Full pytree with the base standard deviation at the varying leaves
         and `0` at the fixed leaves."""
-        return jtu.tree_map(jnp.sqrt, self.variance())
+        return jax.tree.map(jnp.sqrt, self.variance())
 
     def log_cdf(self, value: PyTree) -> Array:
         """Log CDF of the varying leaves; fixed leaves are ignored."""
@@ -198,7 +186,7 @@ class Embedded(
         `None`-padded pytree mirroring `fixed`, which every pytree-shaped
         `distreqx` distribution does (see the class docstring).
         """
-        fixed_shapes = jtu.tree_map(
+        fixed_shapes = jax.tree.map(
             lambda f: None if f is None else jnp.shape(f), self.fixed, is_leaf=_is_none
         )
         return self._embed(
@@ -237,10 +225,9 @@ class Embedded(
         """
         if not isinstance(other_dist, Embedded):
             raise TypeError(
-                "KL divergence is only supported between two Embedded "
-                "distributions."
+                "KL divergence is only supported between two Embedded " "distributions."
             )
-        if jtu.tree_structure(self.fixed, is_leaf=_is_none) != jtu.tree_structure(
+        if jax.tree.structure(self.fixed, is_leaf=_is_none) != jax.tree.structure(
             other_dist.fixed, is_leaf=_is_none
         ):
             raise ValueError(
@@ -248,12 +235,12 @@ class Embedded(
                 "varying/fixed leaf structure."
             )
 
-        agree = jtu.tree_map(
+        agree = jax.tree.map(
             lambda a, b: True if a is None else jnp.array_equal(a, b),
             self.fixed,
             other_dist.fixed,
             is_leaf=_is_none,
         )
-        all_agree = jnp.all(jnp.asarray(jtu.tree_leaves(agree)))
+        all_agree = jnp.all(jnp.asarray(jax.tree.leaves(agree)))
         base_kl = self.distribution.kl_divergence(other_dist.distribution, **kwargs)
         return jnp.where(all_agree, base_kl, jnp.inf)
