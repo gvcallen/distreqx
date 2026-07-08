@@ -1,6 +1,7 @@
 from ._bernoulli import Bernoulli as Bernoulli
 from ._beta import Beta as Beta
 from ._categorical import Categorical as Categorical
+from ._combined import Combined as Combined
 from ._deterministic import Deterministic as Deterministic
 from ._distribution import (
     AbstractCDFDistribution as AbstractCDFDistribution,
