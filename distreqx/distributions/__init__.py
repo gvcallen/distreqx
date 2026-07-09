@@ -11,7 +11,6 @@ from ._distribution import (
     AbstractSTDDistribution as AbstractSTDDistribution,
     AbstractSurvivalDistribution as AbstractSurvivalDistribution,
 )
-from ._embedded import Embedded as Embedded
 from ._empirical import (
     AbstractEmpirical as AbstractEmpirical,
     Empirical as Empirical,
