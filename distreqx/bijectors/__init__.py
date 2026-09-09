@@ -11,6 +11,7 @@ from ._lambda import Lambda as Lambda
 from ._identity import Identity as Identity
 from ._inverse import Inverse as Inverse
 from ._linear import AbstractLinearBijector as AbstractLinearBijector
+from ._r2_to_complex import R2ToComplex as R2ToComplex
 from ._rational_quadratic_spline import (
     RationalQuadraticSpline as RationalQuadraticSpline,
 )
