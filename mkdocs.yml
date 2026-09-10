@@ -129,6 +129,7 @@ nav:
             - 'api/bijectors/sigmoid.md'
             - 'api/bijectors/tanh.md'
             - 'api/bijectors/softplus.md'
+            - 'api/bijectors/split.md'
             - 'api/bijectors/r2_to_complex.md'
             - 'api/bijectors/rational_quadratic_spline.md'
             - 'api/bijectors/identity.md'
