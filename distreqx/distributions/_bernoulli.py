@@ -17,9 +17,13 @@ class Bernoulli(
     AbstractSTDDistribution,
     AbstractSurvivalDistribution,
 ):
-    """Bernoulli distribution of shape dims.
+    r"""Bernoulli distribution over $\{0, 1\}$.
 
-    Bernoulli distribution with parameter `probs`, the probability of outcome `1`.
+    For success probability $p = P(X = 1)$, the probability mass function is
+
+    $$
+    P(X = x) = p^x (1 - p)^{1 - x}, \quad x \in \{0, 1\}.
+    $$
     """
 
     _logits: Array | None
@@ -30,15 +34,14 @@ class Bernoulli(
         logits: float | Array | None = None,
         probs: float | Array | None = None,
     ):
-        """Initializes a Bernoulli distribution.
+        r"""Initializes a Bernoulli distribution.
 
         **Arguments:**
 
-        - `logits`: Logit transform of the probability of a `1` event (`0` otherwise),
-            i.e. `probs = sigmoid(logits)`. Only one of `logits` or `probs` can be
-            specified.
-        - `probs`: Probability of a `1` event (`0` otherwise). Only one of `logits` or
-            `probs` can be specified.
+        - `logits`: Log-odds $\ell = \log(p / (1 - p))$ for the event $X = 1$.
+            Only one of `logits` or `probs` can be specified.
+        - `probs`: Probability $p = P(X = 1)$. Only one of `logits` or `probs` can
+            be specified.
         """
         # Validate arguments.
         if (logits is None) == (probs is None):
@@ -52,7 +55,7 @@ class Bernoulli(
 
     @property
     def logits(self) -> Array:
-        """The logits of a `1` event."""
+        """The logits of a $1$ event."""
         if self._logits is not None:
             return self._logits
         if self._probs is None:
@@ -61,7 +64,7 @@ class Bernoulli(
 
     @property
     def probs(self) -> Array:
-        """The probabilities of a `1` event.."""
+        """The probabilities of a $1$ event."""
         if self._probs is not None:
             return self._probs
         if self._logits is None:
@@ -74,9 +77,9 @@ class Bernoulli(
 
     @property
     def support(self) -> tuple[Array, Array]:
-        """See `Distribution.support`.
+        r"""See `Distribution.support`.
 
-        The Bernoulli is discrete on `{0, 1}`.
+        The Bernoulli is discrete on $\{0, 1\}$.
         """
         dtype = self.probs.dtype
         return (jnp.array(0.0, dtype=dtype), jnp.array(1.0, dtype=dtype))
@@ -150,7 +153,7 @@ class Bernoulli(
         return (self.probs > 0.5).astype("int8")
 
     def kl_divergence(self, other_dist, **kwargs) -> Array:
-        """Calculates the KL divergence to another distribution.
+        r"""Calculates the KL divergence to another distribution.
 
         **Arguments:**
 
@@ -159,7 +162,8 @@ class Bernoulli(
 
         **Returns:**
 
-        The KL divergence `KL(self || other_dist)`.
+        The divergence $D_{\mathrm{KL}}(P \parallel Q)$, where $P$ is this
+        distribution and $Q$ is `other_dist`.
         """
         dist1 = self
         dist2 = other_dist
