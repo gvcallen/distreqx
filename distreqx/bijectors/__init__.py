@@ -11,9 +11,17 @@ from ._indexed import Indexed as Indexed
 from ._linear import AbstractLinearBijector as AbstractLinearBijector
 from ._permute import Permute as Permute
 from ._reshape import Reshape as Reshape
+from ._identity import Identity as Identity
+from ._inverse import Inverse as Inverse
+from ._linear import AbstractLinearBijector as AbstractLinearBijector
+from ._r2_to_complex import R2ToComplex as R2ToComplex
+from ._rational_quadratic_spline import (
+    RationalQuadraticSpline as RationalQuadraticSpline,
+)
 from ._scalar_affine import ScalarAffine as ScalarAffine
 from ._shift import Shift as Shift
 from ._sigmoid import Sigmoid as Sigmoid
+from ._split import Split as Split
 from ._tanh import Tanh as Tanh
 from ._triangular_linear import TriangularLinear as TriangularLinear
 from ._unconstrained_affine import UnconstrainedAffine as UnconstrainedAffine
